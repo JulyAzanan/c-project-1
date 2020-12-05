@@ -48,6 +48,28 @@ void print_results(int* a) {
 }
 
 /**
+*Requires : an array of size nb_player and the pointers to 2 int
+*Assigns : modify the value of value and i
+*Ensures : i is the player who won the game, and value their score
+*/
+void max_score(int *a, int *value, int *i) {
+    *i = 0;
+    for (int j = 1; j < nb_player; j++) { //ne traite pas le cas des égalités 
+        *i = a[*i] < a[j] ? j : *i;
+    }
+    *value = a[*i];
+}
+
+/**
+*Requires : a player id and their score
+*Assigns : nothing
+*Ensures : announce the winner officially 
+*/
+void winner(int i, int value) {
+    printf("Le.a grand.e gagnant.e est joueur.euse %i avec un score de %i\n", i+1, value);
+}
+
+/**
 *Requires : 2 strings
 *Assigns : nothing
 *Ensures : returns 1 if the string s1 begin like (or is equal to) the string s2 (or the opposite : s2 begin like or is equal to s1) and 0 if else
