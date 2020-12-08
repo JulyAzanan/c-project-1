@@ -5,6 +5,7 @@
 
 int size = 5;   //global variable representing the size (length OR width) of the game pleteau
 int nb_player = 2;  //global variable representing the number of players
+plate p_g;
 
 struct cases {
     int activated;
@@ -55,7 +56,7 @@ plate create_empty_plate() {
             new_plate[i][j].activated = 0;
         }
     }
-    print_plate_state(new_plate);
+    //print_plate_state(new_plate);
     return new_plate;
 }
 
@@ -99,7 +100,7 @@ int place_at(int player, int i, int j, plate *p, int n) {
     //printf("%i %i\n", i, j);
     //stop case : the case is out of bounds, or it has already been activated
     if (oob(i, j) || (*p)[i-1][j-1].activated) {
-        if (n) printf("Les valeurs entrées ne correspondent pas. Rappel : 1 <= valeurs <= %i\n", size);
+        //if (n) printf("Les valeurs entrées ne correspondent pas. Rappel : 1 <= valeurs <= %i\n", size);
         //printf("not placed at %i %i\n", i, j);
         return 0;
     }
@@ -133,7 +134,7 @@ int is_plate_full(plate p) {
 }
 
 /**
-*Requires : a plate p (full)
+*Requires : a plate p
 *Assigns : a array of int of size nb_player
 *Ensures : returns the list of the scores of each player
 */
@@ -142,24 +143,39 @@ int* count_score(plate p) {
     for (int i = 0; i < nb_player; i++) scores[i] = 0;
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            scores[head(p[i][j].l) - 1]++;
+            int tmp = head(p[i][j].l);
+            if (tmp > 0) scores[head(p[i][j].l) - 1]++;
         }
     }
     return scores;
 }
 
-/* int main() {
-    plate p = create_empty_plate();
-    place_at(1, -1, 2, &p, 1);
-    print_plate_state(p);
-    deactivate_all(&p);
-    place_at(2, 5, 1, &p, 1);
-    print_plate_state(p);
-    deactivate_all(&p);
-    place_at(2, 5, 1, &p, 1);
-    deactivate_all(&p);
-    print_plate_state(p);
-    pretty_print(p[0][0].l);
-    return 0;
+/**
+*Requires : nothing
+*Assigns : a new plate p2
+*Ensures : returns a copy of the plate p
+*/
+plate copy_plate(plate p) {
+    plate p2 = create_empty_plate();
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            copy(p[i][j].l, &p2[i][j].l);
+        }
+    }
+    return p2;
 }
- */
+
+/**
+*Requires : nothing
+*Assigns : nothing
+*Ensures : destroy the plate and free the memory
+*/
+void destroy_plate(plate p) {
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            reset(&p[i][j].l);
+        }
+        free(p[i]);
+    }
+    free(p);
+}

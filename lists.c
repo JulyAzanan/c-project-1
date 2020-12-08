@@ -113,7 +113,7 @@ void remove_one (int value, list *l) {
 *Assigns : nothing
 *Ensures : resets completly the list, frees everything, and set the list to NULL (empty list)
 */
-void reset(list *l) { //unused
+void reset(list *l) { 
     //loop invariant : l is not cylic so it only has a finite number of element
     while (*l != NULL) {
         list tmp = *l;
@@ -131,4 +131,21 @@ void reset(list *l) { //unused
 int head(list l) {
     if (l == NULL) return -1;
     return l->value;
+}
+
+/**
+*Requires : l2 is set to NULL
+*Assigns : a new list l2
+*Ensures : returns a new list that is the copy of l
+*/
+void copy(list l, list *l2) {
+    if (l == NULL) return;
+    push(l->value, l2);
+    l = l->next;
+    list tmp = (*l2)->next;
+    while (l != NULL) {
+        push(l->value, &tmp);
+        tmp = tmp->next;
+        l = l->next;
+    }
 }

@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include "plate.h"
 #include "lists.h"
+#include "AI.h"
 
 extern int nb_player; //global variable present in plate.c
 extern int size; //global variable present in plate.c
 int p_turn = 0; //global variable indicating whose turn it is to play
-plate p; //global variable representing the game plateau
+extern plate p_g; //global variable representing the game plateau present in plate.c
 int no_winner = 1; //global variable indicating if someone has already won
 
 /**
@@ -20,7 +21,7 @@ plate init() {
     do {
         printf("Veuillez entrer un nombre de joueurs.\n");
         fgets(buf, 256, stdin);
-    } while (sscanf(buf, "%i\n", &nb_player) != 1 && nb_player > 1);
+    } while (sscanf(buf, "%i\n", &nb_player) != 1 && nb_player > 0);
     //loop invariant : idem
     do {
         printf("Veuillez entrer une taille de terrain.\n");
@@ -85,6 +86,23 @@ int compare_strings(char *s1, char *s2) {
 
 /**
 *Requires : nothing
+*Assigns : modifies the value of the global variable no_winner
+*Ensures : detect if the game is over, announce the ranking and finish the game (and the program)
+*/
+void detect_victory() {
+    if (is_plate_full(p_g)) {
+        no_winner = 0;
+        print_results(count_score(p_g));
+        int i = 0;
+        int score = 0;
+        max_score(count_score(p_g), &score, &i);
+        winner(i, score);
+        return;
+    }
+}
+
+/**
+*Requires : nothing
 *Assigns : a lot of things
 *Ensures : play the turn of one player, and check if the game is over
 */
@@ -101,7 +119,7 @@ void update() {
         if (sscanf(buf, "%i %i", &x, &y) != 2) continue;
         if (!oob(x, y)) {
             printf("\n");
-            print_cases(x, y, p);
+            print_cases(x, y, p_g);
         }
         else {
             printf("Les valeurs entrées ne correspondent pas. Rappel : 1 <= valeurs <= %i\n", size);
@@ -110,27 +128,36 @@ void update() {
         printf("Confirmez vous le choix de placer en %i %i ?(o/n)\n", x, y);
         fgets(buf, 256, stdin);
         if (compare_strings(buf, "o")) {
-            if (place_at(p_turn, x, y, &p, 1))
+            if (place_at(p_turn, x, y, &p_g, 1))
                 validate = 1;
         }
     }
-    if (is_plate_full(p)) {
-        no_winner = 0;
-        print_results(count_score(p));
-        int i = 0;
-        int score = 0;
-        max_score(count_score(p), &score, &i);
-        winner(i, score);
-        return;
-    }
-    print_plate_state(p);
-    deactivate_all(&p);
+    print_plate_state(p_g);
+    deactivate_all(&p_g);
     p_turn = p_turn >= nb_player ? 1 : p_turn + 1;
 }
 
 int main() {
-    p = init();
+    p_g = init();
+    print_plate_state(p_g);
     //loop invariant : the game will finish when all case will be filled with at least one item
-    while(no_winner) update();
+    if (nb_player > 1) {
+        while(no_winner) {
+            update();
+            detect_victory();
+        }
+    }
+    else {
+        nb_player = 2;
+        printf("Mode solo : vous allez affronter Omega, une jeune mais motivée intelligence artificielle.\n");
+        while(no_winner) {
+            update();
+            detect_victory();
+            if (!no_winner) break;
+            update_ai();
+            detect_victory();
+            p_turn = 1;
+        }
+    }
     return 0;
 }

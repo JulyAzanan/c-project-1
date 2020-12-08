@@ -18,8 +18,10 @@ int mem (int value, list l);
 
 void remove_one (int value, list *l);
 
-void reset(list *l); //unused
+void reset(list *l); 
 
 int head(list l);
+
+void copy(list l, list *l2);
 
 #endif

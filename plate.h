@@ -22,4 +22,8 @@ int is_plate_full(plate p);
 
 int* count_score(plate p);
 
+plate copy_plate(plate p);
+
+void destroy_plate(plate p);
+
 #endif  
