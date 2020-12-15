@@ -19,16 +19,16 @@ list create_empty() {
 }
 
 /**
-*Requires : a list l
+*Requires : nothing
 *Assigns : nothing
-*Ensures : returns 1 if the list is empty
+*Ensures : returns 1 if the list is empty and 0 if else
 */
 int is_empty(list l) {
     return l == NULL;
 }
 
 /**
-*Requires : a value and a pointer to a list
+*Requires : nothing
 *Assigns : a new cell of the list
 *Ensures : push value at the head of the list
 */
@@ -40,9 +40,9 @@ void push(int value, list *l) {
 }
 
 /**
-*Requires : a list 
+*Requires : nothing
 *Assigns : nothing
-*Ensures : returns the value at the head of the list and remove it from the list. returns -1 if the list is empty
+*Ensures : returns the value at the head of the list and remove it from the list. Returns -1 if the list is empty
 */
 int pop(list *l) {
     if (*l == NULL) return -1; //valeur par défaut
@@ -54,7 +54,7 @@ int pop(list *l) {
 }
 
 /**
-*Requires : a list 
+*Requires : nothing
 *Assigns : nothing
 *Ensures : prints the list in a fancy way (like a pile of plate)
 */
@@ -68,7 +68,7 @@ void pretty_print(list l) {
 }
 
 /**
-*Requires : a value and a list
+*Requires : nothing
 *Assigns : nothing
 *Ensures : returns 1 if value is inside of l, and 0 if else
 */
@@ -82,7 +82,7 @@ int mem (int value, list l) {
 }
 
 /**
-*Requires : a value and a pointer to a list
+*Requires : nothing
 *Assigns : curr and next
 *Ensures : remove the first element value of the list, if there is at least one inside of it
 */
@@ -109,7 +109,7 @@ void remove_one (int value, list *l) {
 }
 
 /**
-*Requires : a pointer to a list l
+*Requires : nothing
 *Assigns : nothing
 *Ensures : resets completly the list, frees everything, and set the list to NULL (empty list)
 */
@@ -124,7 +124,7 @@ void reset(list *l) {
 }
 
 /**
-*Requires : a list
+*Requires : nothing
 *Assigns : nothing
 *Ensures : returns the value of the head of the list, or -1 if the list is empty
 */

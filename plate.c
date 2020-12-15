@@ -5,7 +5,7 @@
 
 int size = 5;   //global variable representing the size (length OR width) of the game pleteau
 int nb_player = 2;  //global variable representing the number of players
-plate p_g;
+plate p_g;  //global variable representing the game plate, used by main.c and AI.c
 
 struct cases {
     int activated;
@@ -16,7 +16,7 @@ typedef struct cases cases;
 typedef cases** plate;
 
 /**
-*Requires : a plate p
+*Requires : nothing
 *Assigns : nothing
 *Ensures : prints the current state of the plate in a fancy way
 */
@@ -56,14 +56,13 @@ plate create_empty_plate() {
             new_plate[i][j].activated = 0;
         }
     }
-    //print_plate_state(new_plate);
     return new_plate;
 }
 
 /**
-*Requires : a pointer to a plate p
+*Requires : nothing
 *Assigns : nothing
-*Ensures : turns all casses to their deactivated state
+*Ensures : turns all cases to their deactivated state
 */
 void deactivate_all(plate *p) {
     for (int i = 0; i < size; i++) {
@@ -74,9 +73,9 @@ void deactivate_all(plate *p) {
 }
 
 /**
-*Requires : i and j
+*Requires : nothing
 *Assigns : nothing
-*Ensures : 1 if the region specified by i and j is Out Of Bounds, and 0 if it is fine
+*Ensures : returns 1 if the region specified by i and j is Out Of Bounds, and 0 if it is a valid coordinate in the game plate
 */
 int oob(int i, int j) {
     return (i > size || j > size || i < 1 || j < 1);
@@ -97,17 +96,13 @@ void print_cases(int i, int j, plate p) {
 *Ensures : returns 1 and update p if it could place successfully, and 0 if else
 */
 int place_at(int player, int i, int j, plate *p, int n) {
-    //printf("%i %i\n", i, j);
     //stop case : the case is out of bounds, or it has already been activated
     if (oob(i, j) || (*p)[i-1][j-1].activated) {
-        //if (n) printf("Les valeurs entrées ne correspondent pas. Rappel : 1 <= valeurs <= %i\n", size);
-        //printf("not placed at %i %i\n", i, j);
         return 0;
     }
     if (player ==  head((*p)[i-1][j-1].l)) {
         remove_one(player, &((*p)[i-1][j-1].l));
         (*p)[i-1][j-1].activated = 1;
-        //printf("Activating %i %i\n", i, j);
         place_at(player, i-1, j, p, 0);
         place_at(player, i+1, j, p, 0);
         place_at(player, i, j-1, p, 0);
@@ -115,12 +110,11 @@ int place_at(int player, int i, int j, plate *p, int n) {
         return 1;
     }
     push(player, &((*p)[i-1][j-1].l));
-    //printf("Placed at %i %i\n", i, j);
     return 1;
 }
 
 /**
-*Requires : a plate p
+*Requires : nothing
 *Assigns : nothing
 *Ensures : returnes 1 if the plate is full, and 0 if else
 */
@@ -134,7 +128,7 @@ int is_plate_full(plate p) {
 }
 
 /**
-*Requires : a plate p
+*Requires : nothing
 *Assigns : a array of int of size nb_player
 *Ensures : returns the list of the scores of each player
 */

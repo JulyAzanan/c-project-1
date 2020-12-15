@@ -11,22 +11,27 @@ extern plate p_g; //global variable representing the game plateau present in pla
 int no_winner = 1; //global variable indicating if someone has already won
 
 /**
+*Requires : asks the player to enter ONE numeric value > to condition
+*Assigns : a buffer of size 256
+*Ensures : prompts the player something specified by the ask variable, and if it is in the correct format, modifies the value of *var. Loops while the player input is not in the correct format
+*/
+void ask_player_one_thing(char *ask, int* var, int condition) {
+    char buf[256];
+    //Loop invariant : the player will end prompting a correct value
+    do {
+        printf("%s\n", ask);
+        fgets(buf, 256, stdin);
+    } while (sscanf(buf, "%i\n", var) != 1 || *var <= condition);
+}
+
+/**
 *Requires : nothing
 *Assigns : a plate p
 *Ensures : returns an empty plate of dimension given by the user and for the amount of player given by the user
 */
 plate init() {
-    char buf[256];
-    //loop invariant : the user will end to enter an integer > 1.
-    do {
-        printf("Veuillez entrer un nombre de joueurs.\n");
-        fgets(buf, 256, stdin);
-    } while (sscanf(buf, "%i\n", &nb_player) != 1 && nb_player > 0);
-    //loop invariant : idem
-    do {
-        printf("Veuillez entrer une taille de terrain.\n");
-        fgets(buf, 256, stdin);
-    } while (sscanf(buf, "%i\n", &size) != 1 && size > 1);
+    ask_player_one_thing("Veuillez entrer un nombre de joueurs.", &nb_player, 0);
+    ask_player_one_thing("Veuillez entrer une taille de terrain.", &size, 1);
     p_turn = 1;
     return create_empty_plate();
 }
@@ -43,35 +48,13 @@ void print_results(int* a) {
     }
     printf("\n");
     for (int i = 0; i < nb_player; i++) {
-        printf("       %i ", a[i]);
+        printf("%8i ", a[i]);
     }
     printf("\n");
 }
 
 /**
-*Requires : an array of size nb_player and the pointers to 2 int
-*Assigns : modify the value of value and i
-*Ensures : i is the player who won the game, and value their score
-*/
-void max_score(int *a, int *value, int *i) {
-    *i = 0;
-    for (int j = 1; j < nb_player; j++) { //ne traite pas le cas des égalités 
-        *i = a[*i] < a[j] ? j : *i;
-    }
-    *value = a[*i];
-}
-
-/**
-*Requires : a player id and their score
-*Assigns : nothing
-*Ensures : announce the winner officially 
-*/
-void winner(int i, int value) {
-    printf("Le.a grand.e gagnant.e est joueur.euse %i avec un score de %i\n", i+1, value);
-}
-
-/**
-*Requires : 2 strings
+*Requires : nothing
 *Assigns : nothing
 *Ensures : returns 1 if the string s1 begin like (or is equal to) the string s2 (or the opposite : s2 begin like or is equal to s1) and 0 if else
 */
@@ -93,10 +76,6 @@ void detect_victory() {
     if (is_plate_full(p_g)) {
         no_winner = 0;
         print_results(count_score(p_g));
-        int i = 0;
-        int score = 0;
-        max_score(count_score(p_g), &score, &i);
-        winner(i, score);
         return;
     }
 }
@@ -104,7 +83,7 @@ void detect_victory() {
 /**
 *Requires : nothing
 *Assigns : a lot of things
-*Ensures : play the turn of one player, and check if the game is over
+*Ensures : play the turn of one player
 */
 void update() {
     printf("C'est au tour du joueur %i de jouer.\n", p_turn);
@@ -112,10 +91,14 @@ void update() {
     int x = -1;
     int y = -1;
     int validate = 0;
-    //loop invariant : the loop will end when the user will prompt a valid case coordinate and confirm their choice
+    //loop invariant : the loop will end when the user will prompt a valid cell coordinate and confirm their choice
     while (!validate) {
-        printf("Veuillez sélectionner une case. Format attendu : x y\n");
-        fgets(buf, 256, stdin);
+        printf("Veuillez sélectionner une case. Format attendu : x y.\n");
+        if (fgets(buf, 256, stdin) == NULL) {
+            printf("EOF rencontré dans stdin. Arrêt prématuré du jeu.\n");
+            fflush(stdout);
+            exit(0);
+        }
         if (sscanf(buf, "%i %i", &x, &y) != 2) continue;
         if (!oob(x, y)) {
             printf("\n");
@@ -149,7 +132,9 @@ int main() {
     }
     else {
         nb_player = 2;
-        printf("Mode solo : vous allez affronter Omega, une jeune mais motivée intelligence artificielle.\n");
+        init_taunts();
+        printf("Mode solo : vous allez affronter Omega.\n");
+        //loop invariant : idem
         while(no_winner) {
             update();
             detect_victory();

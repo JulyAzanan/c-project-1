@@ -2,7 +2,10 @@
 #define _AI_H
 #include "lists.h"
 #include "plate.h"
+#include "myrandom.h"
 
 void update_ai();
+
+void init_taunts();
 
 #endif

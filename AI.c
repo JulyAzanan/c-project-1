@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "plate.h"
 #include "lists.h"
+#include "myrandom.h"
 
 struct move {
     int x;
@@ -14,7 +16,55 @@ typedef struct move move;
 
 extern plate p_g;
 extern int size;
-//plate p_copy;
+char **taunts;
+int nb_taunts;
+
+/**
+*Requires : nothing
+*Assigns : nothing
+*Ensures : returns the number of lines of the file given in argument or 0 if an error occured.
+*/
+int count_lines(char* s) {
+    FILE *f = fopen(s, "r");
+    if (f == NULL) return 0;
+    int res = 0;
+    char ch;
+    while(!feof(f)) {
+        ch = fgetc(f);
+        if(ch == '\n') {
+            res++;
+        }
+    }
+    fclose(f);
+    return res;
+}
+
+/**
+*Requires : nothing
+*Assigns : taunts and nb_taunts
+*Ensures : init taunts and nb_taunts
+*/
+void init_taunts() {
+    int lines = count_lines("taunts.txt");
+    if (!lines) {
+        taunts = malloc(sizeof(char*));
+        taunts[0] = malloc(256*sizeof(char));
+        taunts[0] = "A toi de jouer, humain. Sauras-tu contrer le coup que vient de faire Omega ?\n";
+        nb_taunts = 1;
+        return;
+    }
+    taunts = malloc(lines*sizeof(char*));
+    char buf[256];
+    FILE *f = fopen("taunts.txt", "r");
+    int i = 0;
+    while(fgets(buf, 256, f) != NULL) {
+        taunts[i] = malloc(256*sizeof(char));
+        sprintf(taunts[i], "%s", buf);
+        i++;
+    }
+    nb_taunts = lines;
+    fclose(f);
+}
 
 /**
 *Requires : nothing
@@ -61,7 +111,7 @@ move pre_move(int x, int y) {
 /**
 *Requires : a list of move of size size*size
 *Assigns : nothing
-*Ensures : ensures that mini_ennemy and max_self now contains the indices of the moves : one that gives the minimum score to the ennemy and the others the maximum score for the AI
+*Ensures : ensures that mini_ennemy and max_self now contains the indexes of the moves : one that gives the minimum score to the ennemy and the other the maximum score for the AI
 */
 void minimax(move *m, int *mini_ennemy, int *max_self) {
     *mini_ennemy = 0;
@@ -73,7 +123,24 @@ void minimax(move *m, int *mini_ennemy, int *max_self) {
     }
 }
 
+/**
+*Requires : nothing
+*Assigns : nothing
+*Ensures : prints a random taunt picked in taunts
+*/
+void omega_taunt() {
+    int r = rand_between(0, nb_taunts - 1);
+    printf("Omega : %s", taunts[r]);
+}
+
+/**
+*Requires : nothing
+*Assigns : nothing
+*Ensures : Play the turn of the AI
+*/
 void update_ai() {
+    printf("Analyse du terrain en cours...\n");
+    sleep(1);
     move *move_list = malloc(size*size*sizeof(move));
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -82,6 +149,8 @@ void update_ai() {
     }
     int mini = 0;
     int maxi = 0;
+    printf("Simulation du futur...\n");
+    sleep(1);
     minimax(move_list, &mini, &maxi);
     int diff_score_max = move_list[maxi].value_for_self - move_list[maxi].value_for_ennemy;
     int diff_score_min = move_list[mini].value_for_self - move_list[mini].value_for_ennemy;
@@ -96,5 +165,5 @@ void update_ai() {
     print_plate_state(p_g);
     deactivate_all(&p_g);
     free(move_list);
-    printf("A toi de jouer, humain. Sauras-tu contrer ce coup d'Omega ?\n");
+    omega_taunt();
 }
