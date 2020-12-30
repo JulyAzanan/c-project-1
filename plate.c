@@ -6,6 +6,7 @@
 int size = 5;   //global variable representing the size (length OR width) of the game pleteau
 int nb_player = 2;  //global variable representing the number of players
 plate p_g;  //global variable representing the game plate, used by main.c and AI.c
+int p_turn = 0; //global variable representing who is playing. Used in main.c and AI.c
 
 struct cases {
     int activated;
@@ -16,7 +17,7 @@ typedef struct cases cases;
 typedef cases** plate;
 
 /**
-*Requires : nothing
+*Requires : p and *p are valid adresses
 *Assigns : nothing
 *Ensures : prints the current state of the plate in a fancy way
 */
@@ -48,7 +49,7 @@ void print_plate_state(plate p) {
 *Ensures : returns a new empty plate
 */
 plate create_empty_plate() {
-    plate new_plate = malloc(size*sizeof(cases));
+    plate new_plate = malloc(size*sizeof(cases*));
     for (int i = 0; i < size; i++) {
         new_plate[i] = malloc(size*sizeof(cases));
         for (int j = 0; j < size; j++) {
@@ -60,7 +61,7 @@ plate create_empty_plate() {
 }
 
 /**
-*Requires : nothing
+*Requires : p and *p are valid adresses
 *Assigns : nothing
 *Ensures : turns all cases to their deactivated state
 */
@@ -73,7 +74,7 @@ void deactivate_all(plate *p) {
 }
 
 /**
-*Requires : nothing
+*Requires : i and j are the "natural" coordinates : so in order to be INSIDE the game plate, we must have 1 <= i, j <= size
 *Assigns : nothing
 *Ensures : returns 1 if the region specified by i and j is Out Of Bounds, and 0 if it is a valid coordinate in the game plate
 */
@@ -82,7 +83,7 @@ int oob(int i, int j) {
 }
 
 /**
-*Requires : nothing
+*Requires : p and *p are valid adresses
 *Assigns : nothing
 *Ensures : prints the content of the case in a pretty format
 */
@@ -91,7 +92,7 @@ void print_cases(int i, int j, plate p) {
 }
 
 /**
-*Requires : a player id, i, j and a plate, and n, which indicates if it's from a chain (0) or from a player input (1) and a list remembering all the activated cases during the turn
+*Requires : p and *p are valid adresses
 *Assigns : nothing
 *Ensures : returns 1 and update p if it could place successfully, and 0 if else
 */
@@ -100,8 +101,8 @@ int place_at(int player, int i, int j, plate *p, int n) {
     if (oob(i, j) || (*p)[i-1][j-1].activated) {
         return 0;
     }
-    if (player ==  head((*p)[i-1][j-1].l)) {
-        remove_one(player, &((*p)[i-1][j-1].l));
+    if (player == head((*p)[i-1][j-1].l)) {
+        pop(&((*p)[i-1][j-1].l));
         (*p)[i-1][j-1].activated = 1;
         place_at(player, i-1, j, p, 0);
         place_at(player, i+1, j, p, 0);
@@ -114,7 +115,7 @@ int place_at(int player, int i, int j, plate *p, int n) {
 }
 
 /**
-*Requires : nothing
+*Requires : p and *p are valid adresses
 *Assigns : nothing
 *Ensures : returnes 1 if the plate is full, and 0 if else
 */
@@ -128,7 +129,7 @@ int is_plate_full(plate p) {
 }
 
 /**
-*Requires : nothing
+*Requires : p and *p are valid adresses
 *Assigns : a array of int of size nb_player
 *Ensures : returns the list of the scores of each player
 */
@@ -145,7 +146,7 @@ int* count_score(plate p) {
 }
 
 /**
-*Requires : nothing
+*Requires : p and *p are valid adresses
 *Assigns : a new plate p2
 *Ensures : returns a copy of the plate p
 */
@@ -160,7 +161,7 @@ plate copy_plate(plate p) {
 }
 
 /**
-*Requires : nothing
+*Requires : p and *p are valid adresses 
 *Assigns : nothing
 *Ensures : destroy the plate and free the memory
 */

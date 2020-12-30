@@ -7,8 +7,6 @@ struct cell {
     struct cell *next;
 };
 
-typedef struct cell* list;
-
 /**
 *Requires : nothing
 *Assigns : nothing
@@ -65,47 +63,6 @@ void pretty_print(list l) {
         l = l->next;
     }
     printf("---\n");
-}
-
-/**
-*Requires : nothing
-*Assigns : nothing
-*Ensures : returns 1 if value is inside of l, and 0 if else
-*/
-int mem (int value, list l) {
-    //loop invariant : l is not cylic so it only has a finite number of element
-    while (l != NULL) {
-        if (value == l->value) return 1;
-        l = l->next;
-    }
-    return 0;
-}
-
-/**
-*Requires : nothing
-*Assigns : curr and next
-*Ensures : remove the first element value of the list, if there is at least one inside of it
-*/
-void remove_one (int value, list *l) {
-    if (!mem(value, *l)) return;    //sort de la fonction si liste vide ou bien que value n'est pas dedans
-    list curr = *l;
-    list next = (*l)->next;
-    if (curr->value == value) { //cas où la valeur à enlever est en tête
-        free(curr);
-        *l = next;
-        return;
-    }
-    //loop invariant : l is not cylic so it only has a finite number of element
-    while (next != NULL) { //cas où la valeur à enlever est dans le corps de la liste
-        if (next->value == value) {
-            list tmp = next;
-            curr->next = next->next;
-            free(tmp);
-            return;
-        }
-        curr = curr->next;
-        next = next->next;
-    }
 }
 
 /**

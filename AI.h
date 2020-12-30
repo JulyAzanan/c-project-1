@@ -8,4 +8,6 @@ void update_ai();
 
 void init_taunts();
 
+void first_to_play();
+
 #endif

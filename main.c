@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "plate.h"
 #include "lists.h"
 #include "AI.h"
 
 extern int nb_player; //global variable present in plate.c
 extern int size; //global variable present in plate.c
-int p_turn = 0; //global variable indicating whose turn it is to play
+extern int p_turn; //global variable indicating whose turn it is to play present in plate.c
 extern plate p_g; //global variable representing the game plateau present in plate.c
 int no_winner = 1; //global variable indicating if someone has already won
+extern int difficulty;
 
 /**
 *Requires : asks the player to enter ONE numeric value > to condition
@@ -32,6 +34,7 @@ void ask_player_one_thing(char *ask, int* var, int condition) {
 plate init() {
     ask_player_one_thing("Veuillez entrer un nombre de joueurs.", &nb_player, 0);
     ask_player_one_thing("Veuillez entrer une taille de terrain.", &size, 1);
+    if (nb_player == 1) ask_player_one_thing("Veuillez sélectionner la difficulté de l'intelligence artificielle. (0 = difficile, sinon facile.)", &difficulty, -1);
     p_turn = 1;
     return create_empty_plate();
 }
@@ -133,7 +136,14 @@ int main() {
     else {
         nb_player = 2;
         init_taunts();
-        printf("Mode solo : vous allez affronter Omega.\n");
+        printf("Mode solo : vous allez affronter Omega en difficulté %i.\n", difficulty);
+        srand(time(NULL));
+        p_turn = rand_between(1, 2);
+        if (p_turn == 2) {
+            printf("C'est Omega qui commence\n");
+            first_to_play();
+            //detect_victory() not needed because the plate is of size 2 at least
+        }
         //loop invariant : idem
         while(no_winner) {
             update();
@@ -141,7 +151,6 @@ int main() {
             if (!no_winner) break;
             update_ai();
             detect_victory();
-            p_turn = 1;
         }
     }
     return 0;

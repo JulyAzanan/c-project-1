@@ -14,10 +14,6 @@ int pop(list *l);
 
 void pretty_print(list l);
 
-int mem (int value, list l);
-
-void remove_one (int value, list *l);
-
 void reset(list *l); 
 
 int head(list l);

@@ -16,8 +16,11 @@ typedef struct move move;
 
 extern plate p_g;
 extern int size;
+extern int p_turn;
+extern int nb_player;
 char **taunts;
 int nb_taunts;
+int difficulty = 1; //0 = hard, >= 1 = easy
 
 /**
 *Requires : nothing
@@ -81,7 +84,7 @@ move init_move() {
 }
 
 /**
-*Requires : nothing
+*Requires : p and *p are valid adresses 
 *Assigns : nothing
 *Ensures : complete the move m
 */
@@ -126,7 +129,7 @@ void minimax(move *m, int *mini_ennemy, int *max_self) {
 /**
 *Requires : nothing
 *Assigns : nothing
-*Ensures : prints a random taunt picked in taunts
+*Ensures : prints a randomly picked taunt
 */
 void omega_taunt() {
     int r = rand_between(0, nb_taunts - 1);
@@ -154,16 +157,49 @@ void update_ai() {
     minimax(move_list, &mini, &maxi);
     int diff_score_max = move_list[maxi].value_for_self - move_list[maxi].value_for_ennemy;
     int diff_score_min = move_list[mini].value_for_self - move_list[mini].value_for_ennemy;
-    if (diff_score_max > diff_score_min) { //Omega will do the move that's the best for her and the worst for the player.
-        place_at(2, move_list[maxi].x, move_list[maxi].y, &p_g, 1);
-        printf("Omega a placé son pion en %i %i avec le choix maxi.\n", move_list[maxi].x, move_list[maxi].y);
+    if (difficulty == 0) {
+        if (diff_score_max > diff_score_min) { //Omega will do the move that's the best for her and the worst for the player.
+            place_at(2, move_list[maxi].x, move_list[maxi].y, &p_g, 1);
+            printf("Omega a placé son pion en %i %i avec le choix maxi.\n", move_list[maxi].x, move_list[maxi].y);
+        }
+        else {
+            place_at(2, move_list[mini].x, move_list[mini].y, &p_g, 1);
+            printf("Omega a placé son pion en %i %i avec le choix mini.\n", move_list[mini].x, move_list[mini].y);
+        }
     }
     else {
-        place_at(2, move_list[mini].x, move_list[mini].y, &p_g, 1);
-        printf("Omega a placé son pion en %i %i avec le choix mini.\n", move_list[mini].x, move_list[mini].y);
+        if (diff_score_max >= diff_score_min) { //Omega will do the move that's the best for her and the worst for the player, but if she can avoid to lower the player's score, she will.
+            place_at(2, move_list[maxi].x, move_list[maxi].y, &p_g, 1);
+            printf("Omega a placé son pion en %i %i avec le choix maxi.\n", move_list[maxi].x, move_list[maxi].y);
+        }
+        else {
+            place_at(2, move_list[mini].x, move_list[mini].y, &p_g, 1);
+            printf("Omega a placé son pion en %i %i avec le choix mini.\n", move_list[mini].x, move_list[mini].y);
+        }
     }
     print_plate_state(p_g);
     deactivate_all(&p_g);
     free(move_list);
     omega_taunt();
+    p_turn = p_turn >= nb_player ? 1 : p_turn + 1;
+}
+
+/**
+*Requires : nothing
+*Assigns : nothing
+*Ensures : makes a random move for Omega if she has to play first.
+*/
+void first_to_play() {
+    printf("Analyse du terrain en cours...\n");
+    sleep(1);
+    printf("Simulation du futur...\n");
+    sleep(1);
+    int x = rand_between(1, size);
+    int y = rand_between(1, size);
+    place_at(2, x, y, &p_g, 1);
+    printf("Omega a placé son pion en %i %i\n", x, y);
+     print_plate_state(p_g);
+    deactivate_all(&p_g);
+    omega_taunt();
+    p_turn = p_turn >= nb_player ? 1 : p_turn + 1;
 }
